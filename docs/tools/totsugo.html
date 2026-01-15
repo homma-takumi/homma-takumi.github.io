@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      line-height: 1.5;
+    }
+
+    table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 1rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 10rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .text-red {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+
+  <table>
+    <tr>
+      <td><textarea name="a" id="a" rows="10"></textarea></td>
+      <td><textarea name="b" id="b" rows="10"></textarea></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="center"><button id="btn">突合</button></td>
+    </tr>
+    <tr>
+      <td>
+        <div id="aResult"></div>
+      </td>
+      <td>
+        <div id="bResult"></div>
+      </td>
+    </tr>
+  </table>
+
+  <script>
+    btn.addEventListener('click', () => {
+      const a = document.getElementById('a');
+      const b = document.getElementById('b');
+
+      const aLines = a.value.split('\n');
+      const bLines = b.value.split('\n');
+
+      const aResult = [];
+      const bResult = [];
+
+      let aDiffCount = 0;
+      let bDiffCount = 0;
+
+      for (let i = 0; i < aLines.length; i++) {
+        if (bLines.includes(aLines[i])) {
+          aResult.push(aLines[i]);
+        } else {
+          aResult.push('<span class="text-red">' + aLines[i] + '</span>');
+          aDiffCount++;
+        }
+      }
+
+      for (let i = 0; i < bLines.length; i++) {
+        if (aLines.includes(bLines[i])) {
+          bResult.push(bLines[i]);
+        } else {
+          bResult.push('<span class="text-red">' + bLines[i] + '</span>');
+          bDiffCount++;
+        }
+      }
+
+      document.getElementById('aResult').innerHTML = `差分行数: ${aDiffCount}<br><br><br><br>` + aResult.join('<br>');
+      document.getElementById('bResult').innerHTML = `差分行数: ${bDiffCount}<br><br><br><br>` + bResult.join('<br>');
+    });
+  </script>
+
+</body>
+
+</html>

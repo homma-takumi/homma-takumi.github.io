@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サンドイッチテキスト</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/autosize.js/6.0.1/autosize.min.js"
+    integrity="sha512-OjjaC+tijryqhyPqy7jWSPCRj7fcosu1zreTX1k+OWSwu6uSqLLQ2kxaqL9UpR7xFaPsCwhMf1bQABw2rCxMbg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <script>
+    tailwind.config = {
+      // デフォルトのまま使うので何も書かない
+    };
+  </script>
+  <style type="text/tailwindcss">
+    :root {
+      --animate-duration: 1s;
+      font-family: Consolas, "Noto Sans JP", sans-serif;
+    }
+
+    .input-field {
+      @apply w-full border-2 p-1;
+      transition: background-color 1s ease;
+    }
+
+    .btn {
+      @apply bg-white hover:bg-gray-100 text-gray-800 py-1 px-2 border border-gray-400 rounded whitespace-nowrap text-sm
+    }
+
+    @-webkit-keyframes shakeY {
+
+      0%,
+      to {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0)
+      }
+
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        -webkit-transform: translate3d(0, -2px, 0);
+        transform: translate3d(0, -2px, 0)
+      }
+
+      20%,
+      40%,
+      60%,
+      80% {
+        -webkit-transform: translate3d(0, 2px, 0);
+        transform: translate3d(0, 2px, 0)
+      }
+    }
+
+    @keyframes shakeY {
+
+      0%,
+      to {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0)
+      }
+
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        -webkit-transform: translate3d(0, -2px, 0);
+        transform: translate3d(0, -2px, 0)
+      }
+
+      20%,
+      40%,
+      60%,
+      80% {
+        -webkit-transform: translate3d(0, 2px, 0);
+        transform: translate3d(0, 2px, 0)
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-200">
+
+  <!-- ------------------------------------------------------------------- -->
+  <!-- よく使うやつ -->
+  <!-- ------------------------------------------------------------------- -->
+  <div class="px-8 py-4">
+    <div class="mb-2">
+      <!-- 配列など -->
+      <button class="btn mr-0.5" data-prefix="'" data-suffix="',">シングルクォート</button>
+      <button class="btn mr-0.5" data-prefix='"' data-suffix='",'>ダブルクォート</button>
+      <button class="btn mr-0.5" data-prefix='`' data-suffix='`,'>バックティック</button>
+      <span class="d-inline-block mr-8"></span>
+
+      <!-- PHP -->
+      <button class="btn mr-0.5 text-left" data-prefix="$str .= '" data-suffix="';">$str .= '...';</button>
+      <button class="btn mr-0.5" data-prefix='$str .= "' data-suffix='";'>$str .= "...";</button>
+      <button class="btn mr-0.5" data-prefix='var_dump(' data-suffix=');'>var_dump(...);</button>
+      <button class="btn mr-0.5" data-prefix='print_r(' data-suffix=');'>print_r(...);</button>
+      <button class="btn mr-0.5" data-prefix='echo ' data-suffix=';'>echo ...;</button>
+      <span class="d-inline-block mr-8"></span>
+
+      <!-- Java, C#, JavaScript など -->
+      <button class="btn mr-0.5" data-prefix="str += '" data-suffix="';">str += '...';</button>
+      <button class="btn mr-0.5" data-prefix='str += "' data-suffix='";'>str += "...";</button>
+      <button class="btn mr-0.5" data-prefix='str += `' data-suffix='`;'>str += `...`;</button>
+      <button class="btn mr-0.5" data-prefix='str.append("' data-suffix='");'>str.append("...");</button>
+    </div>
+
+    <div>
+      <!-- HTML -->
+      <button class="btn mr-0.5" data-prefix="&lt;th&gt;" data-suffix="&lt;/th&gt;">&lt;th&gt;...&lt;/th&gt;</button>
+      <button class="btn mr-0.5" data-prefix="&lt;td&gt;" data-suffix="&lt;/td&gt;">&lt;td&gt;...&lt;/td&gt;</button>
+      <button class="btn mr-0.5" data-prefix="&lt;li&gt;" data-suffix="&lt;/li&gt;">&lt;li&gt;...&lt;/li&gt;</button>
+      <span class="d-inline-block mr-8"></span>
+
+      <!-- 日本語 -->
+      <button class="btn mr-0.5" data-prefix="・" data-suffix="">・</button>
+      <button class="btn mr-0.5" data-prefix="■" data-suffix="">■</button>
+      <span class="d-inline-block mr-8"></span>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------------------------- -->
+  <!-- 行頭テキスト、行末テキスト、対象テキストの入力フォーム -->
+  <!-- ------------------------------------------------------------------- -->
+  <div class="flex px-8 py-4">
+    <div class="w-1/4 pr-2">
+      <label for="Prefix" class="text-sm">行頭テキスト</label>
+      <input type="text" id="Prefix" name="prefix" value='sql.append("' placeholder="Prefix" class="input-field">
+    </div>
+    <div class="w-2/4 grow">
+      <label for="Content" class="text-sm">対象テキスト</label>
+      <textarea id="Content" name="content" class="input-field">SELECT
+  *
+FROM
+  hoge
+WHERE
+  1=1
+  AND fuga = piyo
+ORDER BY
+  foo DESC</textarea>
+    </div>
+    <div class="w-1/4 pl-2">
+      <label for="Suffix" class="text-sm">行末テキスト</label>
+      <input type="text" id="Suffix" name="suffix" value='");' placeholder="Suffix" class="input-field">
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------------------------- -->
+  <!-- 結果エリア -->
+  <!-- ------------------------------------------------------------------- -->
+  <div class="flex px-8 py-4">
+    <div class="w-full grow">
+      <label for="Output" class="text-sm">結果</label>
+      <textarea id="Output" name="output" class="input-field" readonly></textarea>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const setPrefixAndSuffix = (event) => {
+        Prefix.value = event.target.dataset.prefix;
+        Suffix.value = event.target.dataset.suffix;
+
+        const animateCssClassList = ['animate__animated', 'animate__shakeY'];
+        Prefix.classList.remove(...animateCssClassList);
+        Output.classList.remove(...animateCssClassList);
+        Suffix.classList.remove(...animateCssClassList);
+        setTimeout(() => {
+          Prefix.classList.add(...animateCssClassList);
+          Output.classList.add(...animateCssClassList);
+          Suffix.classList.add(...animateCssClassList);
+        }, 10);
+        sandwich();
+      };
+
+      const sandwich = () => {
+        const outputValue = Content.value.split(/\r?\n/g).map(row => Prefix.value + row + Suffix.value).join('\n');
+        Output.value = outputValue;
+        autosize.update(Output);
+      };
+
+      autosize(Content);
+      autosize(Output);
+      sandwich();
+
+      Prefix.addEventListener('input', sandwich);
+      Content.addEventListener('input', sandwich);
+      Suffix.addEventListener('input', sandwich);
+
+      const setPrefixAndSuffixBtnList = document.querySelectorAll('[data-prefix]');
+      setPrefixAndSuffixBtnList.forEach(btn => {
+        btn.addEventListener('click', setPrefixAndSuffix);
+      });
+    })();
+  </script>
+</body>
+
+</html>
