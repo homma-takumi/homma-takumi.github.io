@@ -34,11 +34,16 @@
       cursor: pointer;
     }
 
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+
     .center {
       text-align: center;
     }
 
-    .text-red {
+    .ng {
       color: red;
     }
   </style>
@@ -55,10 +60,24 @@
       <td colspan="2" class="center"><button id="btn">突合</button></td>
     </tr>
     <tr>
+      <td colspan="2" class="center">
+        <input type="checkbox" name="showDifferencesOnly" id="showDifferencesOnly" checked>
+        <label for="showDifferencesOnly">片方にしかない行のみを表示する</label>
+      </td>
+    </tr>
+    <tr class="center" style="border-bottom: 2px solid #000;">
       <td>
-        <div id="aResult"></div>
+        <div id="aResultSummary"></div>
       </td>
       <td>
+        <div id="bResultSummary"></div>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">
+        <div id="aResult"></div>
+      </td>
+      <td style="vertical-align: top;">
         <div id="bResult"></div>
       </td>
     </tr>
@@ -69,8 +88,8 @@
       const a = document.getElementById('a');
       const b = document.getElementById('b');
 
-      const aLines = a.value.split('\n');
-      const bLines = b.value.split('\n');
+      const aLines = a.value.split('\n').filter(line => line.trim() !== '');
+      const bLines = b.value.split('\n').filter(line => line.trim() !== '');
 
       const aResult = [];
       const bResult = [];
@@ -80,24 +99,37 @@
 
       for (let i = 0; i < aLines.length; i++) {
         if (bLines.includes(aLines[i])) {
-          aResult.push(aLines[i]);
+          aResult.push(`<span class="ok" hidden>${aLines[i]}<br></span>`);
         } else {
-          aResult.push('<span class="text-red">' + aLines[i] + '</span>');
+          aResult.push('<span class="ng">' + aLines[i] + '<br></span>');
           aDiffCount++;
         }
       }
 
       for (let i = 0; i < bLines.length; i++) {
         if (aLines.includes(bLines[i])) {
-          bResult.push(bLines[i]);
+          bResult.push(`<span class="ok" hidden>${bLines[i]}<br></span>`);
         } else {
-          bResult.push('<span class="text-red">' + bLines[i] + '</span>');
+          bResult.push('<span class="ng">' + bLines[i] + '<br></span>');
           bDiffCount++;
         }
       }
 
-      document.getElementById('aResult').innerHTML = `差分行数: ${aDiffCount}<br><br><br><br>` + aResult.join('<br>');
-      document.getElementById('bResult').innerHTML = `差分行数: ${bDiffCount}<br><br><br><br>` + bResult.join('<br>');
+      document.getElementById('aResultSummary').innerHTML = `差分行数: ${aDiffCount}`;
+      document.getElementById('bResultSummary').innerHTML = `差分行数: ${bDiffCount}`;
+
+      document.getElementById('aResult').innerHTML = aResult.join('');
+      document.getElementById('bResult').innerHTML = bResult.join('');
+    });
+
+    showDifferencesOnly.addEventListener('change', () => {
+      if (showDifferencesOnly.checked) {
+        document.querySelectorAll(`.ok`).forEach(el => el.setAttribute('hidden', 'hidden'));
+        document.querySelectorAll(`.ng`).forEach(el => el.removeAttribute('hidden'));
+      } else {
+        document.querySelectorAll(`.ok`).forEach(el => el.removeAttribute('hidden'));
+        document.querySelectorAll(`.ng`).forEach(el => el.removeAttribute('hidden'));
+      }
     });
   </script>
 
