@@ -8,19 +8,38 @@
   <style>
     body {
       background: #f0f0f0;
+      font-family: Arial, sans-serif;
     }
 
     label {
       display: block;
+      margin: 5px 0;
+      font-weight: bold;
     }
 
     input[type=range] {
       width: 100%;
+      margin: 5px 0 15px 0;
     }
 
     img,
     canvas {
       max-height: 240px;
+    }
+
+    h3 {
+      color: #333;
+      border-bottom: 2px solid #333;
+      padding-bottom: 5px;
+      margin: 20px 0 10px 0;
+    }
+
+    .gradient-control {
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
@@ -33,6 +52,19 @@
 
   <label for="BlurField">ぼかし <span id="BlurValue">1px</span></label>
   <input type="range" id="BlurField" min="0" max="10" step="0.1" value="1"><br>
+
+  <h3>グラデーション設定</h3>
+  <div class="gradient-control">
+    <label for="YellowPos">黄色の位置 <span id="YellowPosValue">35%</span></label>
+    <input type="range" id="YellowPos" min="5" max="90" step="1" value="35"><br>
+
+    <label for="RedPos">赤色の位置 <span id="RedPosValue">45%</span></label>
+    <input type="range" id="RedPos" min="5" max="90" step="1" value="45"><br>
+
+    <label for="DarkPos">濃いグレーの位置 <span id="DarkPosValue">80%</span></label>
+    <input type="range" id="DarkPos" min="10" max="95" step="1" value="80"><br>
+  </div>
+
   <hr>
 
   オリジナル<br>
@@ -45,20 +77,33 @@
   <!-- SEE: https://qiita.com/akebi_mh/items/3377666c26071a4284ee -->
   <script src="color_convert.js"></script>
   <script>
+    // グローバル変数
+    let currentImageObj = null;
+    let currentFileUrl = null;
+
+    /**
+     * 現在のスライダー値に基づいてグラデーション配列を取得する
+     */
+    function getCurrentGradient() {
+      const yellowPos = parseInt(YellowPos.value);
+      const redPos = parseInt(RedPos.value);
+      const darkPos = parseInt(DarkPos.value);
+
+      return [
+        [0, [255, 255, 255]], // 0% White
+        [yellowPos, [255, 255, 0]], // Yellow
+        [redPos, [255, 0, 0]], // Red
+        [darkPos, [51, 51, 51]], // Dark charcoal
+        [100, [0, 0, 0]], // 100% Black
+      ];
+    }
+
     /**
      * 爆発色を取得する
      */
     function getExplosionRgb(percentage) {
-      // グラデーション設定。CSS の linear-gradient() みたいに設定する。
-      // gradient[i][0] = 割合
-      // gradient[i][1] = 色
-      const gradient = [
-        [0, [255, 255, 255]], // 0% White
-        [35, [255, 255, 0]], // 35% Yellow
-        [45, [255, 0, 0]], // 45% Red
-        [80, [51, 51, 51]], // 80% Dark charcoal
-        [100, [0, 0, 0]], // 100% Black
-      ];
+      // 現在の設定からグラデーションを取得
+      const gradient = getCurrentGradient();
 
       // percentage に最も近い2つの色を取得
       let colorRange = []
@@ -103,57 +148,117 @@
       return rgb;
     }
 
+    /**
+     * 画像に爆発エフェクトを適用する
+     */
+    function processImage() {
+      if (!currentImageObj) return;
+
+      const ctx = ExplosionImgCanvas.getContext(`2d`, { willReadFrequently: true });
+
+      // <canvas> を大きさとぼかしを設定
+      ExplosionImgCanvas.width = currentImageObj.width;
+      ExplosionImgCanvas.height = currentImageObj.height;
+      ExplosionImgCanvas.style.filter = `blur(${BlurValue.textContent})`;
+
+      // 画像の加工
+      ctx.drawImage(currentImageObj, 0, 0);
+      const src = ctx.getImageData(0, 0, currentImageObj.width, currentImageObj.height);
+      const dst = ctx.createImageData(currentImageObj.width, currentImageObj.height);
+
+      // 輝度に応じて爆発色に変換して描画
+      for (let i = 0; i < src.data.length; i += 4) {
+        const hsl = rgb2hsl(src.data[i], src.data[i + 1], src.data[i + 2]);
+        const explosionRgb = getExplosionRgb(hsl.l * 100);
+
+        dst.data[i] = explosionRgb.r;
+        dst.data[i + 1] = explosionRgb.g;
+        dst.data[i + 2] = explosionRgb.b;
+        dst.data[i + 3] = src.data[i + 3]; // 不透明度 (Alpha)
+      }
+      ctx.putImageData(dst, 0, 0);
+    }
+
     ImgField.addEventListener(`change`, (e) => {
       if (e?.target?.files?.length === 0) return;
 
       // --------------------------------------------------
       // アップロードされた画像のURLを取得
       // --------------------------------------------------
-      const fileUrl = URL.createObjectURL(e.target.files[0]);
+      currentFileUrl = URL.createObjectURL(e.target.files[0]);
 
       // --------------------------------------------------
       // オリジナル画像を描画
       // --------------------------------------------------
-      OriginalImg.src = fileUrl;
+      OriginalImg.src = currentFileUrl;
 
       // --------------------------------------------------
       // 画像オブジェクトを生成
       // --------------------------------------------------
-      const imgObj = new Image();
-      imgObj.src = fileUrl;
+      currentImageObj = new Image();
+      currentImageObj.src = currentFileUrl;
 
       // --------------------------------------------------
-      // <canvas> に爆発加工した画像を描画
+      // 画像読み込み完了後に爆発エフェクトを適用
       // --------------------------------------------------
-      const ctx = ExplosionImgCanvas.getContext(`2d`, { willReadFrequently: true });
-      imgObj.onload = function () {
-        // <canvas> を大きさとぼかしを設定
-        ExplosionImgCanvas.width = imgObj.width;
-        ExplosionImgCanvas.height = imgObj.height;
-        ExplosionImgCanvas.style.filter = `blur(${BlurValue.textContent})`;
-
-        // 画像の加工
-        ctx.drawImage(imgObj, 0, 0);
-        const src = ctx.getImageData(0, 0, imgObj.width, imgObj.height);
-        const dst = ctx.createImageData(imgObj.width, imgObj.height);
-
-        // 輝度に応じて爆発色に変換して描画
-        for (let i = 0; i < src.data.length; i += 4) {
-          const hsl = rgb2hsl(src.data[i], src.data[i + 1], src.data[i + 2]);
-          const explosionRgb = getExplosionRgb(hsl.l * 100);
-
-          dst.data[i] = explosionRgb.r;
-          dst.data[i + 1] = explosionRgb.g;
-          dst.data[i + 2] = explosionRgb.b;
-          dst.data[i + 3] = src.data[i + 3]; // 不透明度 (Alpha)
-        }
-        ctx.putImageData(dst, 0, 0);
+      currentImageObj.onload = function () {
+        processImage();
       };
     });
 
     BlurField.addEventListener(`input`, (e) => {
       BlurValue.textContent = `${e.target.value}px`;
-      ExplosionImgCanvas.style.filter = `blur(${BlurValue.textContent})`;
+      if (currentImageObj) {
+        ExplosionImgCanvas.style.filter = `blur(${BlurValue.textContent})`;
+      }
+    });
+
+    // グラデーション調整スライダーのイベントリスナー
+    YellowPos.addEventListener(`input`, (e) => {
+      let value = parseInt(e.target.value);
+      const redValue = parseInt(RedPos.value);
+
+      // 黄色は赤より小さくなければならない
+      if (value >= redValue) {
+        value = redValue - 1;
+        e.target.value = value;
+      }
+
+      YellowPosValue.textContent = `${value}%`;
+      processImage();
+    });
+
+    RedPos.addEventListener(`input`, (e) => {
+      let value = parseInt(e.target.value);
+      const yellowValue = parseInt(YellowPos.value);
+      const darkValue = parseInt(DarkPos.value);
+
+      // 赤は黄色より大きく、濃いグレーより小さくなければならない
+      if (value <= yellowValue) {
+        value = yellowValue + 1;
+        e.target.value = value;
+      }
+      if (value >= darkValue) {
+        value = darkValue - 1;
+        e.target.value = value;
+      }
+
+      RedPosValue.textContent = `${value}%`;
+      processImage();
+    });
+
+    DarkPos.addEventListener(`input`, (e) => {
+      let value = parseInt(e.target.value);
+      const redValue = parseInt(RedPos.value);
+
+      // 濃いグレーは赤より大きくなければならない
+      if (value <= redValue) {
+        value = redValue + 1;
+        e.target.value = value;
+      }
+
+      DarkPosValue.textContent = `${value}%`;
+      processImage();
     });
   </script>
 
