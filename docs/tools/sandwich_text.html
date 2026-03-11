@@ -140,7 +140,7 @@
     </div>
     <div class="w-2/4 grow">
       <label for="Content" class="text-sm">対象テキスト</label>
-      <textarea id="Content" name="content" class="input-field">SELECT
+      <textarea id="Content" name="content" class="input-field" style="max-height: calc(20 * 1.5em + 0.5rem); overflow-y: auto;">SELECT
   *
 FROM
   hoge
@@ -161,7 +161,10 @@ ORDER BY
   <!-- ------------------------------------------------------------------- -->
   <div class="flex px-8 py-4">
     <div class="w-full grow">
-      <label for="Output" class="text-sm">結果</label>
+      <div class="flex items-center gap-2 mb-1">
+        <label for="Output" class="text-sm">結果</label>
+        <button id="CopyBtn" class="btn text-xs">コピー</button>
+      </div>
       <textarea id="Output" name="output" class="input-field" readonly></textarea>
     </div>
   </div>
@@ -203,6 +206,14 @@ ORDER BY
       const setPrefixAndSuffixBtnList = document.querySelectorAll('[data-prefix]');
       setPrefixAndSuffixBtnList.forEach(btn => {
         btn.addEventListener('click', setPrefixAndSuffix);
+      });
+
+      CopyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(Output.value).then(() => {
+          const original = CopyBtn.textContent;
+          CopyBtn.textContent = 'コピーしました！';
+          setTimeout(() => { CopyBtn.textContent = original; }, 1500);
+        });
       });
     })();
   </script>
