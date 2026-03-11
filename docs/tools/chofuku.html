@@ -77,14 +77,16 @@
       const aLines = a.value.split('\n').filter(line => line.trim() !== '');
 
       const aResult = [];
+      const seen = new Set();
 
       let aDiffCount = 0;
 
       for (let i = 0; i < aLines.length; i++) {
-        if (aLines.indexOf(aLines[i]) !== i) {
+        if (seen.has(aLines[i])) {
           aResult.push('<span class="ng">' + aLines[i] + '<br></span>');
           aDiffCount++;
         } else {
+          seen.add(aLines[i]);
           aResult.push(`<span class="ok" hidden>${aLines[i]}<br></span>`);
         }
       }
